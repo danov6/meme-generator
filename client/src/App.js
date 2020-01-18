@@ -1,7 +1,5 @@
 import React from 'react';
 import './App.css';
-import 'file-upload-with-preview/dist/file-upload-with-preview.min.css'
-import FileUploadWithPreview from 'file-upload-with-preview'
 
 class App extends React.Component{
   state={
@@ -21,18 +19,39 @@ class App extends React.Component{
     });
     console.log('test')
   }
+
   componentDidMount(){
-    var upload = new FileUploadWithPreview('GGG', {
-      showDeleteButtonOnImages: true,
-      text: {
-          chooseFile: 'Custom Placeholder Copy',
-          browse: 'Custom Button Copy',
-          selectedCount: 'Custom Files Selected Copy',
-      },
-      images: {
-          baseImage: '',
-      }
-    })
+    var imageLoader = document.getElementById('img');
+    imageLoader.addEventListener('change', handleImage, false);
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+
+    function handleImage(e){
+        var reader = new FileReader();
+        reader.onload = function(event){
+            var img = new Image();
+            img.onload = function(){
+                var width = img.width;
+                var height = img.height;
+                var ratio = (height/width);
+                if(width > 500){
+                    width = 500;
+                    height = 500 * ratio;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img,0,0);
+
+                ctx.font = "30px Arial";
+                ctx.fillText("Hello World", 10, 50);
+            }
+            img.src = event.target.result;
+            console.log(img)
+            // img.width = 500;
+        }
+        console.log(e.target.files[0]);
+        reader.readAsDataURL(e.target.files[0]);     
+    }
   }
 
   render(){
@@ -40,17 +59,10 @@ class App extends React.Component{
     return(
       <div className='App'>
         <header className='App-header'>
-          <h1>Email Template Index</h1>
-          <div className="custom-file-container" data-upload-id="GGG">
-              <label>Upload File <a href="javascript:void(0)" className="custom-file-container__image-clear" title="Clear Image" style= {{textDecoration: 'none'}}>&times;</a></label>
-  
-              <label className="custom-file-container__custom-file" >
-                  <input type="file" className="custom-file-container__custom-file__custom-file-input" accept="*" multiple aria-label="Choose File" />
-                  <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
-                  <span className="custom-file-container__custom-file__custom-file-control"></span>
-              </label>
-              <div className="custom-file-container__image-preview"></div>
-          </div>
+          <h1>Meme Generator</h1>
+          <canvas id="canvas">
+          </canvas>
+          <input type="file" id="img" />
         </header>
       </div>
     )
